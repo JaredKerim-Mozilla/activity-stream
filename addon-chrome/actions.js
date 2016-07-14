@@ -1,10 +1,13 @@
 const ChromePlacesProvider = require("addon-chrome/ChromePlacesProvider");
 const ChromeSearchProvider = require("addon-chrome/ChromeSearchProvider");
 const {ADDON_TO_CONTENT} = require("common/event-constants");
+const {SyncProvider} = require("addon-chrome/SyncProvider");
 const {SEARCH_HEADER,
 SEARCH_FOR_SOMETHING,
 SEARCH_SETTINGS,
 SEARCH_PLACEHOLDER} = require("addon-chrome/constants");
+
+const syncProvider = new SyncProvider({});
 
 /**
  * Respond with top frencent sites
@@ -245,9 +248,23 @@ function deleteBookmark(data) {
  * @param {Object} action - Action config
  */
 function dispatch(action) {
-  window.dispatchEvent(
-    new CustomEvent(ADDON_TO_CONTENT, {detail: action})
-  );
+  if (action.type.indexOf('_RESPONSE') > -1) {
+    console.log('response!');
+    console.log(action);
+    syncProvider.syncLinks(action.type, action.data).then((syncedLinks) => {
+      console.log('Received synced LInks!');
+      console.log(syncedLinks);
+      action.data = syncedLinks;
+
+      window.dispatchEvent(
+        new CustomEvent(ADDON_TO_CONTENT, {detail: action})
+      );
+    });
+  } else {
+    window.dispatchEvent(
+      new CustomEvent(ADDON_TO_CONTENT, {detail: action})
+    );
+  }
 }
 
 module.exports = {topFrecentSites,

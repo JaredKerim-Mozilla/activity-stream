@@ -158,7 +158,7 @@ module.exports = class ChromePlacesProvider {
    */
   static getHistory(options) {
     const today = new Date().getTime();
-    const aYear = 365 * 24 * 60 * 60 * 1000;
+    const aYear = 60 * 60 * 1000; // One hour
     const aYearAgo = today - aYear;
     const defaultOption = {
       text: "",
