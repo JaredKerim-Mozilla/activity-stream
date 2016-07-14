@@ -18,8 +18,9 @@ SyncProvider.prototype = {
     const preparedLinks = {};
 
     if (links) {
-      for (let link of links) {
-        const urlKey = btoa(link.cacheKey + link.lastVisitDate);
+      for(var i=0;i<links.length;i++) {
+        const link = links[i];
+        const urlKey = btoa(link.url + link.lastVisitDate);
         preparedLinks[urlKey] = link;
       }
     }
