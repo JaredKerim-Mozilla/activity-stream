@@ -3,6 +3,11 @@ const db = require("addon-chrome/db");
 const {BLOCKED_URL, METADATA} = require("addon-chrome/constants");
 const {getMetadata} = require("page-metadata-parser");
 
+function getFaviconUrl(url) {
+ const parsedUrl = new URL(url);
+ return parsedUrl.protocol + '//' + parsedUrl.host + '/favicon.ico';
+}
+
 module.exports = class ChromePlacesProvider {
   /**
    * Calculate frecency scores for each history items (except google searches) base on
@@ -302,7 +307,7 @@ module.exports = class ChromePlacesProvider {
             mergedHist = Object.assign(hist, metadata);
           }
           Object.assign(mergedHist, {
-            favicon_url: "chrome://favicon/" + hist.url,
+            favicon_url: getFaviconUrl(hist.url),
             lastVisitDate: parseInt(hist.lastVisitTime, 10)
           });
           resolve(mergedHist);
@@ -326,7 +331,7 @@ module.exports = class ChromePlacesProvider {
             Object.assign(bookmark, metadata);
           }
           Object.assign(bookmark, {
-            favicon_url: "chrome://favicon/" + bookmark.url,
+            favicon_url: getFaviconUrl(bookmark.url),
             bookmarkDateCreated: bookmark.dateAdded,
             bookmarkGuid: bookmark.id
           });
