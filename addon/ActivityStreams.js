@@ -493,13 +493,13 @@ ActivityStreams.prototype = {
   _get_memoized(cache) {
     let linksObj = PlacesProvider.links;
     return {
-      getTopFrecentSites: cache.memoize("getTopFrecentSites", PlacesProvider.links.getTopFrecentSites.bind(linksObj)),
-      getAllHistoryItems: cache.memoize("getAllHistoryItems", PlacesProvider.links.getAllHistoryItems.bind(linksObj)),
-      getRecentBookmarks: cache.memoize("getRecentBookmarks", PlacesProvider.links.getRecentBookmarks.bind(linksObj)),
-      getRecentLinks: cache.memoize("getRecentLinks", PlacesProvider.links.getRecentLinks.bind(linksObj)),
-      getHighlightsLinks: cache.memoize("getHighlightsLinks", PlacesProvider.links.getHighlightsLinks.bind(linksObj)),
-      getHistorySize: cache.memoize("getHistorySize", PlacesProvider.links.getHistorySize.bind(linksObj)),
-      getBookmarksSize: cache.memoize("getBookmarksSize", PlacesProvider.links.getBookmarksSize.bind(linksObj))
+      getTopFrecentSites: PlacesProvider.links.getTopFrecentSites.bind(linksObj),
+      getAllHistoryItems: PlacesProvider.links.getAllHistoryItems.bind(linksObj),
+      getRecentBookmarks: PlacesProvider.links.getRecentBookmarks.bind(linksObj),
+      getRecentLinks: PlacesProvider.links.getRecentLinks.bind(linksObj),
+      getHighlightsLinks: PlacesProvider.links.getHighlightsLinks.bind(linksObj),
+      getHistorySize: PlacesProvider.links.getHistorySize.bind(linksObj),
+      getBookmarksSize: PlacesProvider.links.getBookmarksSize.bind(linksObj)
     };
   },
 
