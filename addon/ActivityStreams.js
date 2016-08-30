@@ -28,6 +28,7 @@ const {CONTENT_TO_ADDON, ADDON_TO_CONTENT} = require("common/event-constants");
 const {ExperimentProvider} = require("addon/ExperimentProvider");
 const {Recommender} = require("common/recommender/Recommender");
 const {PrefsProvider} = require("addon/PrefsProvider");
+const raven = require("addon/vendor.bundle").raven;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource:///modules/NewTabURL.jsm");
