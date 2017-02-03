@@ -287,16 +287,14 @@ PreviewProvider.prototype = {
     linksList.forEach(link => this._alreadyRequested.add(link.cache_key));
 
     let requestQueue = [];
-    let promises = [];
     while (linksList.length !== 0) {
       // we have some new links we need to fetch the metadata for, put them on the queue
       requestQueue.push(linksList.splice(0, this.options.proxyMaxLinks));
     }
     // for each bundle of 25 links, create a new request to metadata service
-    requestQueue.forEach(requestBundle => {
-      promises.push(this._asyncFetchAndStore(requestBundle, event));
-    });
-    yield Promise.all(promises).catch(err => Cu.reportError(err));
+    for (let requestBundle of requestQueue) {
+      yield this._asyncFetchAndStore(requestBundle, event);
+    }
   }),
 
   /**
@@ -328,36 +326,31 @@ PreviewProvider.prototype = {
     // extract only the sanitized link urls to send to metadata service
     let linkURLs = newLinks.map(link => link.sanitized_url);
     this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestSentCount", newLinks.length);
-    try {
-      // Make network call when enabled and record how long the network call took
-      const startNetworkCall = absPerf.now();
-      let response = yield this._asyncGetLinkData(linkURLs);
-      const endNetworkCall = absPerf.now();
-      this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestTime", endNetworkCall - startNetworkCall);
+    // Make network call when enabled and record how long the network call took
+    const startNetworkCall = absPerf.now();
+    let response = yield this._asyncGetLinkData(linkURLs);
+    const endNetworkCall = absPerf.now();
+    this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestTime", endNetworkCall - startNetworkCall);
 
-      if (response.ok) {
-        let responseJson = yield response.json();
-        this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestReceivedCount", Object.keys(responseJson.urls).length);
-        this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestSucess", 1);
-        let linksToInsert = newLinks.filter(link => responseJson.urls[link.sanitized_url])
-          .map(link => Object.assign({}, link, responseJson.urls[link.sanitized_url]));
+    if (response.ok) {
+      let responseJson = yield response.json();
+      this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestReceivedCount", Object.keys(responseJson.urls).length);
+      this._tabTracker.handlePerformanceEvent(event, "embedlyProxyRequestSucess", 1);
+      let linksToInsert = newLinks.filter(link => responseJson.urls[link.sanitized_url])
+        .map(link => Object.assign({}, link, responseJson.urls[link.sanitized_url]));
 
-        // add favicon_height and favicon_width to the favicon and store it in db
-        for (let link of linksToInsert) {
-          const {width, height} = yield this._computeImageSize(link.favicon_url);
-          if (height && width) {
-            link.favicon_width = width;
-            link.favicon_height = height;
-          }
+      // add favicon_height and favicon_width to the favicon and store it in db
+      for (let link of linksToInsert) {
+        const {width, height} = yield this._computeImageSize(link.favicon_url);
+        if (height && width) {
+          link.favicon_width = width;
+          link.favicon_height = height;
         }
-
-        this.insertMetadata(linksToInsert, "MetadataService");
-      } else {
-        this._tabTracker.handlePerformanceEvent(event, "embedlyProxyFailure", 1);
       }
-    } catch (err) {
-      Cu.reportError(err);
-      throw err;
+
+      this.insertMetadata(linksToInsert, "MetadataService");
+    } else {
+      this._tabTracker.handlePerformanceEvent(event, "embedlyProxyFailure", 1);
     }
     // regardess of if the link has been cached or if the request has failed, we
     // must still remove the in-flight links from the list
