@@ -150,11 +150,12 @@ PageScraper.prototype = {
    * Message handler for the incoming framescript messages
    */
   _messageHandler(message) {
-    let {text, url} = message.data.data;
+    let metadata = message.data.data;
+    let url = metadata.url;
     if (message.data.type === "PAGE_HTML" && this._blacklistFilter(url)) {
       const event = this._tabTracker.generateEvent({source: "PAGE_SCRAPER"});
       this._tabTracker.handlePerformanceEvent(event, PERFORMANCE_EVENT_NAMES.framescript_event, Date.now());
-      this._parseAndSave(text, url, event);
+      this._asyncSaveMetadata(metadata, event);
     }
   },
 
