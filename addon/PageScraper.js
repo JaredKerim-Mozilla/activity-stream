@@ -163,7 +163,7 @@ PageScraper.prototype = {
    */
   init() {
     this._messageHandler = this._messageHandler.bind(this);
-    Services.mm.loadFrameScript(this.options.framescriptPath, true);
+    //Services.mm.loadFrameScript(this.options.framescriptPath, true);
     Services.mm.addMessageListener("page-scraper-message", this._messageHandler);
   },
 
@@ -172,7 +172,7 @@ PageScraper.prototype = {
    */
   uninit() {
     Services.mm.removeMessageListener("page-scraper-message", this._messageHandler);
-    Services.mm.removeDelayedFrameScript(this.options.framescriptPath);
+    //Services.mm.removeDelayedFrameScript(this.options.framescriptPath);
   }
 };
 
