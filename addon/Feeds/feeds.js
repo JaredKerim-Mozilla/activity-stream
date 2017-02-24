@@ -6,10 +6,10 @@ const MetadataFeed = require("./MetadataFeed");
 const LocalizationFeed = require("./LocalizationFeed");
 
 module.exports = [
-  TopSitesFeed,
-  HighlightsFeed,
-  PlacesStatsFeed,
-  SearchFeed,
-  MetadataFeed,
-  LocalizationFeed
+  //TopSitesFeed,
+  //HighlightsFeed,
+  //PlacesStatsFeed,
+  //SearchFeed,
+  //MetadataFeed,
+  //LocalizationFeed
 ];
