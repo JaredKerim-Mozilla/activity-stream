@@ -96,22 +96,30 @@ module.exports = class HighlightsFeed extends Feed {
 
       this.missingData = false;
 
-      if (experiments.bookmarkScreenshots) {
-        // Get screenshots if we are missing images
-        links = links.slice(0, 18);
-        for (let link of links) {
-          if (this.shouldGetScreenshot(link)) {
-            const screenshot = this.getScreenshot(link.url, this.store);
+      // Get screenshots if we are missing images
+      links = links.slice(0, 18);
+      for (let link of links) {
+        if (link.hasMetadata) {
+          let screenshotUrl;
+          if (link.images && link.images.length > 0) {
+            screenshotUrl = link.images[0].url;
+          } else {
+            screenshotUrl = link.url;
+          }
+          if (screenshotUrl) {
+            link.images = [];
+            const screenshot = this.getScreenshot(screenshotUrl, this.store);
             if (screenshot) {
               link.screenshot = screenshot;
               link.metadata_source = `${link.metadata_source}+Screenshot`;
             } else {
               this.missingData = true;
             }
+          } else {
+            console.log('wtf');
           }
-          if (!link.hasMetadata) {
-            this.missingData = true;
-          }
+        } else {
+          this.missingData = true;
         }
       }
 
