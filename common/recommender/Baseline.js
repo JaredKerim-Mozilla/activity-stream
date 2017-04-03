@@ -101,10 +101,6 @@ class Baseline {
 
     newScore /= Math.pow(1 + features.age, 2);
 
-    if (!features.imageCount || !features.image) {
-      newScore = 0;
-    }
-
     if (!features.description || !features.pathLength) {
       newScore *= 0.2;
     }
