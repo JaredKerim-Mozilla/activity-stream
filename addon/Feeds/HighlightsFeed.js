@@ -8,6 +8,7 @@ const {TOP_SITES_DEFAULT_LENGTH, HIGHLIGHTS_LENGTH} = require("common/constants"
 const am = require("common/action-manager");
 const getScreenshot = require("addon/lib/getScreenshot");
 
+Cu.importGlobalProperties(["fetch"]);
 Cu.import("resource://gre/modules/Task.jsm");
 
 const UPDATE_TIME = 15 * 60 * 1000; // 15 minutes
@@ -84,15 +85,22 @@ module.exports = class HighlightsFeed extends Feed {
         return Promise.reject(new Error("Tried to get weighted highlights but there was no baselineRecommender"));
       }
 
-      let links;
+      const response = yield fetch('https://embedly-proxy.services.mozilla.com/v2/recommendations');
+
+      console.log('\n\n\nResponse', response);
+      const recommendations = yield response.json();
+
+      let links = recommendations.urls;
+
+      console.log('\n\n\nGot pocket urls', links);
       // Get links from places
-      links = yield PlacesProvider.links.getRecentlyVisited();
+      //links = yield PlacesProvider.links.getRecentlyVisited();
 
       // Get metadata from PreviewProvider
       links = yield this.options.getCachedMetadata(links, "HIGHLIGHTS_RESPONSE");
 
       // Score the links
-      links = yield this.baselineRecommender.scoreEntries(links);
+      //links = yield this.baselineRecommender.scoreEntries(links);
 
       this.missingData = false;
 
@@ -107,6 +115,7 @@ module.exports = class HighlightsFeed extends Feed {
             screenshotUrl = link.url;
           }
           if (screenshotUrl) {
+            console.log('\n\n\nGetting screenshot for', screenshotUrl);
             link.images = [];
             const screenshot = this.getScreenshot(screenshotUrl, this.store);
             if (screenshot) {
@@ -122,6 +131,8 @@ module.exports = class HighlightsFeed extends Feed {
           this.missingData = true;
         }
       }
+
+      console.log('\n\n\nMissing data', this.missingData);
 
       return am.actions.Response("HIGHLIGHTS_RESPONSE", links);
     }.bind(this));

@@ -5,6 +5,8 @@ const simplePrefs = require("sdk/simple-prefs");
 const Feed = require("addon/lib/Feed");
 const am = require("common/action-manager");
 const MAX_NUM_LINKS = 5;
+const {Cu} = require("chrome");
+Cu.importGlobalProperties(["fetch"]);
 
 module.exports = class MetadataFeed extends Feed {
   constructor(options) {
@@ -18,16 +20,22 @@ module.exports = class MetadataFeed extends Feed {
    * the state
    */
   getInitialMetadata(reason) {
-    // Get initial topsites metadata
-    return PlacesProvider.links.getTopFrecentSites().then(links => {
-      links.forEach(item => this.linksToFetch.set(item.url, Date.now()));
-      this.refresh(reason);
-    // Get initial highlights metadata
-    }).then(() => PlacesProvider.links.getRecentlyVisited())
-    .then(links => {
-      links.forEach(item => this.linksToFetch.set(item.url, Date.now()));
+    return fetch('https://embedly-proxy.services.mozilla.com/v2/recommendations').then(response => response.json()).then(links => {
+      console.log('\n\n\nGetting metadata for', links.urls);
+      links.urls.forEach(item => this.linksToFetch.set(item.url, Date.now()));
       this.refresh(reason);
     });
+
+    //// Get initial topsites metadata
+    //return PlacesProvider.links.getTopFrecentSites().then(links => {
+    //  links.forEach(item => this.linksToFetch.set(item.url, Date.now()));
+    //  this.refresh(reason);
+    //// Get initial highlights metadata
+    //}).then(() => PlacesProvider.links.getRecentlyVisited())
+    //.then(links => {
+    //  links.forEach(item => this.linksToFetch.set(item.url, Date.now()));
+    //  this.refresh(reason);
+    //});
   }
 
   /**
